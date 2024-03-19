@@ -75,16 +75,20 @@ export async function operatorBuses(operatorId: number, query: string) {
             {
               boardingCity: {
                 city: {
-                  contains: query,
-                  mode: "insensitive",
+                  name: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
                 },
               },
             },
             {
               droppingCity: {
                 city: {
-                  contains: query,
-                  mode: "insensitive",
+                  name: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
                 },
               },
             },
