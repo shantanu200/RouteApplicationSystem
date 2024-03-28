@@ -41,14 +41,16 @@ export async function deleteOperator(id: number) {
 }
 
 export async function getOperatorAnalytics(id: number) {
-  //1. Total Buses
-  //3. Total Cities
-  //4. Total Active Bookings
-  //
-  console.log(id, "id");
   return await prisma.operator.findUnique({
     where: {
       id,
+    },
+    select: {
+      _count: {
+        select: {
+          Bus: true,
+        },
+      },
     },
   });
 }

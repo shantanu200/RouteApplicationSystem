@@ -26,15 +26,16 @@ export async function handleGetLocation(c: Context) {
 
 export async function handleGetSuggestLocation(c: Context) {
   try {
-    const { lat, lng, date, droppingCity,radius } = c.req.query();
+    const { lat, lng, date, droppingCity,radius,page,limit } = c.req.query();
 
-    console.log(c.req.query());
     const locations = await getNearestSuggestion({
       lat: Number(lat),
       lng: Number(lng),
       date,
       droppingCity: Number(droppingCity),
       radius: Number(radius),
+      page: Number(page),
+      limit: Number(limit),
     });
 
     return SuccessRouter(c, "Locations fetched successfully", locations);

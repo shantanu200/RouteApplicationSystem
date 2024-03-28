@@ -1,17 +1,32 @@
 import { Context } from "hono";
 import {
+  cancelBooking,
   createPassenger,
   getSchedulePassenger,
 } from "../functions/Passenger.Function";
-import { ServerErrorRouter, SuccessRouter } from "../handlers/Request.handler";
+import {
+  ErrorRouter,
+  ServerErrorRouter,
+  SuccessRouter,
+} from "../handlers/Request.handler";
+import IMiddleware from "../types/IMiddleware";
 
-export async function handleCreatePassenger(c: Context) {
+export async function handleCreatePassenger(c: IMiddleware) {
   try {
+    const { role, userId } = c;
     const id = c.req.param("id");
     const body = await c.req.json();
-    const passengerObj = await createPassenger(Number(id), body);
-
-    return SuccessRouter(c, "Passenger added", passengerObj);
+    console.log("body", body);
+    console.log(role, userId);
+    let passengerObj;
+    if (role === "user") {
+      passengerObj = await createPassenger(Number(id), body, Number(userId));
+    } else {
+      passengerObj = await createPassenger(Number(id), body);
+    }
+    return passengerObj !== null
+      ? SuccessRouter(c, "Passenger added", passengerObj)
+      : ErrorRouter(c, "Passenger creation failed");
   } catch (error) {
     return ServerErrorRouter(c, error);
   }
@@ -30,3 +45,15 @@ export async function handleGetSchedulePassenger(c: Context) {
   }
 }
 
+export async function handleCancelBooking(c: IMiddleware) {
+  try {
+    const id = c.req.param("id");
+    const passengers = await cancelBooking(Number(id));
+
+    return passengers !== null
+      ? SuccessRouter(c, "Your booking cancelled", {})
+      : ErrorRouter(c, "Unable to cancel Booking");
+  } catch (error) {
+    return ServerErrorRouter(c, error);
+  }
+}

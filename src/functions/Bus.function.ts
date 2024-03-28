@@ -121,6 +121,14 @@ export async function operatorBuses(operatorId: number, query: string) {
   });
 }
 
+export async function deleteBus(busId: number) {
+  return await prisma.bus.delete({
+    where: {
+      id: busId,
+    },
+  });
+}
+
 export async function createBusSchedule(busId: number, body: IBusSchedule) {
   return await prisma.busSchedule.create({
     data: {
@@ -194,6 +202,167 @@ export async function getBusSingleSchedule(id: number) {
             select: {
               location: true,
               time: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+export async function getBusScheduleByDate(
+  operatorId: number,
+  date: string,
+  query: string,
+) {
+  if (!date) {
+    date = moment().format("YYYY-MM-DD");
+  }
+
+  const defaultFilter = {
+    operatorId,
+    busSchedule: {
+      some: {
+        date,
+      },
+    },
+  };
+  let filter = {};
+  if (query !== "") {
+    console.log("Query", query);
+    filter = {
+      operatorId,
+      busSchedule: {
+        some: {
+          date,
+        },
+      },
+      bus: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      //   {
+      //     OR: [
+      //       {
+      //         bus: {
+      //           name: {
+      //             contains: query,
+      //             mode: "insensitive",
+      //           },
+      //         },
+      //       },
+      //       {
+      //         bus: {
+      //           number: {
+      //             contains: query,
+      //             mode: "insensitive",
+      //           },
+      //         },
+      //       },
+      //       {
+      //         bus: {
+      //           boardingCity: {
+      //             city: {
+      //               name: {
+      //                 contains: query,
+      //                 mode: "insensitive",
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //       {
+      //         bus: {
+      //           droppingCity: {
+      //             city: {
+      //               name: {
+      //                 contains: query,
+      //                 mode: "insensitive",
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //       {
+      //         bus: {
+      //           busSchedule: {
+      //             some: {
+      //               date,
+      //               passenger: {
+      //                 some: {
+      //                   name: {
+      //                     contains: query,
+      //                     mode: "insensitive",
+      //                   },
+      //                 },
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //       {
+      //         bus: {
+      //           busSchedule: {
+      //             some: {
+      //               date,
+      //               passenger: {
+      //                 some: {
+      //                   seat: {
+      //                     contains: query,
+      //                     mode: "insensitive",
+      //                   },
+      //                 },
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+    };
+  } else {
+    filter = {
+      operatorId,
+      busSchedule: {
+        some: {
+          date,
+        },
+      },
+    };
+  }
+
+  console.log(JSON.stringify(filter, null, 2));
+  return await prisma.bus.findMany({
+    where: filter,
+    include: {
+      busSchedule: {
+        where: {
+          date,
+        },
+        select: {
+          id: true,
+          time: true,
+          date: true,
+          passenger: {
+            select: {
+              id: true,
+              name: true,
+              contact: true,
+              seat: true,
+              date: true,
+              boardingPoint: {
+                select: {
+                  location: true,
+                  time: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              passenger: true,
             },
           },
         },

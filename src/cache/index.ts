@@ -5,7 +5,7 @@ const cahe = new NodeCache();
 export async function cacheMiddleware(
   key: string,
   dbFunction: Function,
-  expire: number = 60
+  expire: number = 60,
 ) {
   let data;
   if (cahe.has(key)) {
@@ -13,7 +13,7 @@ export async function cacheMiddleware(
   } else {
     const dbData = await dbFunction();
     if (dbData === null || dbData === undefined) {
-      return;
+      return null;
     }
     cahe.set(key, JSON.stringify(dbData), expire);
     data = dbData;

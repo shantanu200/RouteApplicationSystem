@@ -7,13 +7,14 @@ import {
 import {
   createBus,
   createBusSchedule,
-  deleteOperatorSchedule,
+  deleteBus,
   deleteSchedule,
   getBus,
   getBusSchedule,
   getBusSingleSchedule,
   getOperatorTodaySchedule,
   operatorBuses,
+  getBusScheduleByDate,
 } from "../functions/Bus.function";
 import IMiddleware from "../types/IMiddleware";
 import { clearCache } from "../cache";
@@ -40,6 +41,19 @@ export async function handleGetBus(c: Context) {
     return busObj !== null
       ? SuccessRouter(c, "Bus Details", busObj)
       : SuccessRouter(c, "No such bus found", {});
+  } catch (error) {
+    return ServerErrorRouter(c, error);
+  }
+}
+
+export async function handleDeleteBus(c: IMiddleware) {
+  try {
+    const id = c.req.param("id");
+    const busObj = await deleteBus(Number(id));
+
+    return busObj !== null
+      ? SuccessRouter(c, "Bus Details Deleted", busObj)
+      : ErrorRouter(c, "Unable to delete bus Details");
   } catch (error) {
     return ServerErrorRouter(c, error);
   }
@@ -81,6 +95,7 @@ export async function handleGetBusSchedule(c: Context) {
     return ServerErrorRouter(c, error);
   }
 }
+
 export async function handleGetBusSingleSchedule(c: Context) {
   try {
     const id = c.req.param("id");
@@ -111,6 +126,23 @@ export async function handleGetTodayBusSchedule(c: Context) {
   try {
     const id = c.req.param("id");
     const busObj = await getOperatorTodaySchedule(Number(id));
+
+    return busObj !== null
+      ? SuccessRouter(c, "Operator Complete Schedule", busObj)
+      : SuccessRouter(c, "No schedule found", {});
+  } catch (error) {
+    return ServerErrorRouter(c, error);
+  }
+}
+export async function handleGetOperatorBusSchedule(c: IMiddleware) {
+  try {
+    const { userId } = c;
+    const { date, q } = c.req.query();
+    const busObj = await getBusScheduleByDate(
+      Number(userId),
+      String(date),
+      String(q) || "",
+    );
 
     return busObj !== null
       ? SuccessRouter(c, "Operator Complete Schedule", busObj)

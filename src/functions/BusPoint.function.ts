@@ -24,16 +24,34 @@ export async function getBusCity(id: number) {
       },
       busBoardingCity: {
         select: {
+          id: true,
           name: true,
           number: true,
-          droppingCity: true,
+          droppingCity: {
+            select: {
+              city: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
       },
       busDroppingCity: {
         select: {
+          id: true,
           name: true,
           number: true,
-          boardingCity: true,
+          boardingCity: {
+            select: {
+              city: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -44,10 +62,27 @@ export async function getBusCities() {
   return await prisma.operatorCity.findMany();
 }
 
-export async function getOperatorCity(id: number) {
-  return await prisma.operatorCity.findMany({
+export async function getOperatorCity(
+  id: number,
+  query: string,
+  page: number = 1,
+  limit: number = 10
+) {
+  const count = await prisma.operatorCity.count({
     where: {
       operatorId: id,
+    },
+  });
+
+  const data = await prisma.operatorCity.findMany({
+    where: {
+      operatorId: id,
+      city: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
     },
     include: {
       city: {
@@ -60,6 +95,34 @@ export async function getOperatorCity(id: number) {
           busBoardingCity: true,
           busDroppingCity: true,
           OperatorCityPoints: true,
+        },
+      },
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+    orderBy: {
+      cityId: "asc",
+    },
+  });
+
+  return {
+    currentPage: page,
+    totalPage: Math.ceil(count / limit),
+    totalDocument: count,
+    data: data,
+  };
+}
+
+export async function getOperatorCitiesName(operatorId: number) {
+  return await prisma.operatorCity.findMany({
+    where: {
+      operatorId: operatorId,
+    },
+    select: {
+      id: true,
+      city: {
+        select: {
+          name: true,
         },
       },
     },
@@ -117,6 +180,14 @@ export async function updateBusPoint(pointId: number, point: IBusPoint) {
     },
     data: {
       ...point,
+    },
+  });
+}
+
+export async function deleteBusPoint(pointId: number) {
+  return await prisma.operatorCityPoints.delete({
+    where: {
+      id: pointId,
     },
   });
 }

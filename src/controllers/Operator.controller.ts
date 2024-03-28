@@ -45,12 +45,12 @@ export async function handleAllOperator(c: Context) {
   }
 }
 
-export async function handleGetOperator(c: Context) {
+export async function handleGetOperator(c: IMiddleware) {
   try {
-    const id = c.req.param("id");
-    const operatorObj = await getOperator(Number(id));
+    const { userId } = c;
+    const operatorObj = await getOperator(Number(userId));
     return operatorObj === null
-      ? SuccessRouter(c, "No such operator found", {})
+      ? ErrorRouter(c, "No such operator found")
       : SuccessRouter(c, "Operator fetched successfully", operatorObj);
   } catch (error) {
     return ServerErrorRouter(c, error);

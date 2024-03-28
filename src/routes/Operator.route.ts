@@ -12,7 +12,9 @@ import { authMiddleware } from "../middlewares/Auth.middleware";
 
 const operatorRoute = new Hono();
 
-operatorRoute.route("/").post(handleCreateOperator).get(handleAllOperator);
+operatorRoute.route("/").post(handleCreateOperator);
+
+operatorRoute.route("/all").get(handleAllOperator);
 
 operatorRoute.post("/login", handleLoginOperator);
 
@@ -20,6 +22,7 @@ operatorRoute.route("/:id").get(handleGetOperator);
 
 operatorRoute.use("*", authMiddleware);
 
+operatorRoute.get("/", handleGetOperator);
 operatorRoute.put("/", handleUpdateOperator);
 operatorRoute.delete("/", handleDeleteOperator);
 

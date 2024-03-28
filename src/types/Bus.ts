@@ -50,4 +50,5 @@ export interface IPassenger {
   boardingPointId: number;
   busScheduleId: number;
   createdAt: string;
+  userId?: number;
 }

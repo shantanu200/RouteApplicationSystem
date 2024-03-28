@@ -9,6 +9,8 @@ import {
   handleGetOperatorCities,
   handleGetOperatorCitiesPoints,
   handleGetBusPoint,
+  handleDeleteOperatorCitiesPoints,
+  handleGetOperatorCitiesName,
 } from "../controllers/BusPoints.controller";
 import { authMiddleware } from "../middlewares/Auth.middleware";
 
@@ -17,7 +19,8 @@ const busPointRouter = new Hono();
 busPointRouter
   .route("/point/:id")
   .post(handleCreateBusPoint)
-  .get(handleGetOperatorCitiesPoints);
+  .get(handleGetOperatorCitiesPoints)
+  .delete(handleDeleteOperatorCitiesPoints);
 
 busPointRouter.use("*", authMiddleware);
 
@@ -27,6 +30,6 @@ busPointRouter.get("/details/:id", handleGetBusPoint);
 
 busPointRouter.get("/operator", handleGetOperatorCities);
 
-
+busPointRouter.get("/operator/city", handleGetOperatorCitiesName);
 
 export default busPointRouter;

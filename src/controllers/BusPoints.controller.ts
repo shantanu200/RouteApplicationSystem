@@ -4,7 +4,9 @@ import { ServerErrorRouter, SuccessRouter } from "../handlers/Request.handler";
 import {
   createBusCity,
   createBusPoint,
+  deleteBusPoint,
   getBusCity,
+  getOperatorCitiesName,
   getOperatorCity,
   getOperatorCityPoints,
 } from "../functions/BusPoint.function";
@@ -38,9 +40,29 @@ export async function handleGetBusPoint(c: IMiddleware) {
 export async function handleGetOperatorCities(c: IMiddleware) {
   try {
     const { userId } = c;
-    console.log(userId);
-    const busObj = await cacheMiddleware(`cities_${userId}`, () =>
-      getOperatorCity(Number(userId)),
+    const { page, limit, q } = c.req.query();
+    const busObj = await getOperatorCity(
+      Number(userId),
+      String(q) || "",
+      Number(page),
+      Number(limit)
+    );
+    return busObj !== null
+      ? SuccessRouter(c, "Operator all cities", busObj)
+      : SuccessRouter(c, "No Operator cities found", []);
+  } catch (error) {
+    return ServerErrorRouter(c, error);
+  }
+}
+
+export async function handleGetOperatorCitiesName(c: IMiddleware) {
+  try {
+    const { userId } = c;
+
+    const busObj = await cacheMiddleware(
+      `cities_${userId}`,
+      () => getOperatorCitiesName(Number(userId)),
+      Infinity
     );
     return busObj !== null
       ? SuccessRouter(c, "Operator all cities", busObj)
@@ -68,6 +90,18 @@ export async function handleGetOperatorCitiesPoints(c: Context) {
     return busObj !== null
       ? SuccessRouter(c, "Operator all cities points", busObj)
       : SuccessRouter(c, "No Operator cities points found", []);
+  } catch (error) {
+    return ServerErrorRouter(c, error);
+  }
+}
+
+export async function handleDeleteOperatorCitiesPoints(c: IMiddleware) {
+  try {
+    const id = c.req.param("id");
+    const busObj = await deleteBusPoint(Number(id));
+    return busObj !== null
+      ? SuccessRouter(c, "Operator point deleted", busObj)
+      : SuccessRouter(c, "Unable to delete operator point", []);
   } catch (error) {
     return ServerErrorRouter(c, error);
   }
